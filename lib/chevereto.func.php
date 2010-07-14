@@ -24,69 +24,26 @@ define('SC_VERSION','NB2.0'); //FIXME: Final name of this version will be 1.0 or
 require('config.php');
 
 // Pseudo Debug NOTE: maybe change this to a func or move to boot up file?
-if(!$config['debug']['mode']) {
+if(!$config['debug']['active']) {
 	error_reporting(0);
-	include("lib/Firephp_fake.php");
+	include( BASEPATH . "/" . "lib/Firephp_fake.php");
 } else {
-	error_reporting(E_ALL);
-	include("lib/FirePHP.Class.php");
+	error_reporting(E_ALL); //be prepeared to get a LOT of errors
+	include( BASEPATH . "/" . "lib/FirePHP.class.php");
 }
 
-// Critital error box CHANGE: to view file
+// Critital error box
+$errors = array();
 $errors[0] = false; //NOTE: this shouldn't stay here, i guess
 $o_errorbox = '<div style="background: #F00; color: #FFF; font-family: Courier, monospace; font-weight: bold; padding: 1em; text-align: center;">';
 $c_errorbox = '</div>';
-
-function proccessErrors($echo=false)
-{
-global $errors;
-	if (!$errors[0]){
-		return false; // don't wanna run if there are no errors
-	}
-
-	$output = '<div id="errorbox">
-					<div class="errorInner">
-						<p class="errorText">An error ocured. I don\'t know what exacly but these where the error(s):</p>
-						<ul>';
-			foreach ($errors as $key => $error)
-			{
-				if ($key == 0) continue; //This is for something else, is true if there is an error
-				
-				$output .= "<li>"; //open up the li
-				
-					if (($key == 1) && is_array($error)){ //is there an array in the array? CHANGE: move $key == 1 to the line below
-						$output .= "<p class=\"errorText\">It looks like ther are some premissions errors, I can't access/write to these folders:</p>\n";
-						$output .= "<ul>";
-						foreach ($error as $key => $dir)
-						{
-							$output .= "<li>".$dir."</li>\n";
-						}
-						$output .= "</ul>\n";					
-					} else {
-					
-						$output .= $error;
-						$output .= "</li>\n";
-					}			
-				
-			}				
-	$output .= '	</ul>
-				</div>
-			</div>';
-				
-	if ($echo){
-		echo $output;
-	} else {
-		return $output;
-	}
-	
-}
 
 ##doc
 # Purpos: Check directories premissions
 # Creator: Rodolfo Berrios
 ##/doc
 function check_dir_permissions($dir) {
-	global $o_errorbox, $c_errorbox;
+	global $errors;
 	if(!is_writable($dir)) {
 		$errors[0] = true;
 		//'Critital error 01: There is no write permission in '.  //NOTE: use this or not hhmmm
@@ -124,6 +81,9 @@ function check_everything(){
 	if(!isset($DOM_SCRIPT) or empty($DOM_SCRIPT)) {
 		$errors[0] = true;
 		$errors[4] = 'Critital error 04: Invalid $DOM_SCRIPT, edit it manually in config.php';
+		
+		if ($config['debug']['active'])
+			$errors[4] .= "\nYour current dom is set to: ".$DOM_SCRIPT;
 	}
 
 	// CH-CH-Chek cURL
@@ -135,7 +95,7 @@ function check_everything(){
 
 
 // DOCTITLE
-define('ESP_TITULO',' | '); //CHANGE: move to config
+define('ESP_TITULO',' | '); //TODO: move to config
 
 // VARIABLES
 $filesArray = $_FILES['fileup'];
@@ -146,10 +106,22 @@ $urlrez = $_GET['urlrez'];
 $v = $_GET['v'];  if ($v=='.htaccess') { unset($v); $v=''; }
 $page = $_GET['p'];
 $view_fld = $_GET['folder'];
-$resizr = $_GET['ancho']; // Resize via GET
+$resizr = $_GET['ancho']; // Resize via GET | NOTE: ancho is width
+// SET Modo default
+// TODO: move to index.php
+if (!isset($modo))
+	$modo = 1;
+
 
 // SHORT URL SERVICE
-switch($cut_url_service) {
+function short_url_setup()
+{
+	global $config, $tiny_service, $tiny_api;
+		$tiny_service = $config['short_url']['selected'];
+		$tiny_api = $config['short_url'][$tiny_service];
+}
+
+/*switch($cut_url_service) {
 	case 'tinyurl':
 		$tiny_api = 'http://tinyurl.com/api-create.php?url=';
 		$tiny_service = 'TinyURL';
@@ -158,18 +130,53 @@ switch($cut_url_service) {
 		$tiny_api = 'http://tinyurl.com/api-create.php?url=';
 		$tiny_service = 'TinyURL';
 		break;
-}
+}*/
 
 // LANGUAGE
-include('lang/'.$config['lang'].'.php');
-if ($config['lang']!=='es') { $lang = $config['lang']; }
+#TODO: check if this works/ optimize?
+#CHANGED: (11/07/10) preped this for the language selecter
+function load_lang($flang=null)
+{
+	global $config, $lang;
+	if ($flang == null) $flang = $config['lang']; //$flang not set, lets set it. We'll most problay overwrite it later but still.
+	$sesname = $config['prefix']."currentlang";
+	
+	//make sure the user didn't change his language already
+	if (isset($_COOKIE[$sesname])){
+		$flang = $_COOKIE[$sesname];
+	} elseif (isset($_SESSION[$sesname])){
+		$flang = $_SESSION[$sesname];
+	}
+	
+	include('lang/'.$flang.'.php');
+	if ($flang!=='es') { $lang = $flang; }
+	if (!$flang == $config['lang']){ 
+		session_start();
+		$_SESSION[$sesname] = $flang;
+	 }
+}
 
-// DE DONDE VIENES?
-$referer = parse_url($_SERVER['HTTP_REFERER']);
-if (empty($referer['host']) && !isset($referer['host'])) {
-	$referido = $DOM_SCRIPT;
-} else {
-	$referido = $referer['host'];
+function check_ref()
+{
+	global $config, $errors, $DOM_SCRIPT, $filesArray, $remote_up_url, $referido;
+
+	// DE DONDE VIENES? || Where are you from?|| Check wheter they can uplad from
+	$referer = parse_url($_SERVER['HTTP_REFERER']);
+	if (empty($referer['host']) && !isset($referer['host'])) {
+		$referido = $DOM_SCRIPT;
+	} else {
+		$referido = $referer['host'];
+	}
+
+	// Limite de actividad
+	//if (isset($filesArray) || isset($remote_up_url)) {
+		if ($referido !== $DOM_SCRIPT && $config['same_domain']) {
+			if (!isset($url)) {
+				$errors[0] = true;
+				$errors[6] = ERROR_REF;
+			}
+		}
+	//}
 }
 
 if (isset($remote_up_url)) {
@@ -179,16 +186,6 @@ if (isset($remote_up_url)) {
 	$refok = $ref2;
 }
 
-// Limite de actividad
-if (isset($filesArray) || isset($remote_up_url)) {
-	if ($referido !== $DOM_SCRIPT && $config['same_domain']) {
-		if (!isset($url)) {
-			$errors[0] = true;
-			$errors[6] = ERROR_REF;
-		}
-	}
-}
-
 // EL REZ
 if (isset($resizr)) {
 		$resize = str_replace(' ', '', $resizr);
@@ -196,8 +193,6 @@ if (isset($resizr)) {
 		$resize = str_replace(' ', '', $resizf);
 	}
 
-// SET Modo default
-$modo = 1;
 
 // MANEJEMOS LA RUP
 if (isset($url)) {
@@ -205,70 +200,6 @@ if (isset($url)) {
 	} else {
 		$rup = str_replace(' ', '', $remote_up_url);
 	}
-
-// DETERMINAMOS QUE MOSTRAMOS Y HACEMOS
-	//  1 = Mostrar formulario.
-	//  2 = Muetsra el visualizador
-	//  3 = Sube un archivo
-	//  4 = muestra la pag del error de redimensionamiento
-	//  5 = Muestra una pag. estatica
-	//  spit = devuelve los mensajes de error.
-
-// Modo pagina
-if (isset($page)) {
-	unset($modo);
-	$modo = 5;
-	// haga el switch
-	switch ($page) {
-		// Los errores
-		case '400':
-        	$h1 = TITLE_400;
-			$explained = DESC_400;
-        break;
-		case '401':
-        	$h1 = TITLE_401;
-			$explained = DESC_401;
-        break;
-		case '403':
-        	$h1 = TITLE_403;
-			$explained = DESC_403;
-        break;
-		case '404':
-        	$h1 = TITLE_404;
-			$explained = DESC_404;
-        break;
-		case '500':
-        	$h1 = TITLE_500;
-			$explained = DESC_500;
-		case '503':
-        	$h1 = TITLE_503;
-			$explained = DESC_503;
-        break;
-		// Los directorios
-		case 'up':
-        	$h1 = TITLE_DIR_NO;
-			$explained = DESC_DIR_NO;
-        break;
-		case 'up/temp':
-        	$h1 = TITLE_DIR_NO;
-			$explained = DESC_DIR_NO;
-        break;
-		case 'up/working':
-        	$h1 = TITLE_DIR_NO;
-			$explained = DESC_DIR_NO;
-        break;
-		case 'images':
-        	$h1 = TITLE_DIR_NO;
-			$explained = DESC_DIR_NO;
-        break;
-		default:
-			$h1 = TITLE_404;
-			$explained = DESC_404;
-			$page = 'generico';
-		break;
-	}
-	$titulo = $h1.ESP_TITULO;
-}
 
 // Si hay posteo / urleo
 if (isset($filesArray) || isset($remote_up_url) || isset($url)) {
@@ -284,13 +215,34 @@ if (isset($filesArray) || isset($remote_up_url) || isset($url)) {
 	}
 }
 
-// SI HAY DOBLE POSTEO...
-if (!empty($rup) && !empty($filesArray['type'])) {
-	unset($modo);
-	$modo = 1;
-	$spit = true;
-	$errormsg = DOBLE_POSTED;
-	$titulo = FATAL_ERROR_TITLE.ESP_TITULO;
+function check_uploaded()
+{
+	global $spit,$DOM_SCRIPT,$modo,$errormsg,$titulo,$rup,$urlrez;
+	// SI HAY DOBLE POSTEO...
+	//check if not both are set
+	if (!empty($rup) && !empty($filesArray['type'])) {
+	return false;
+	//TODO: move this to the function calling
+		unset($modo);
+		$modo = 1;
+		$spit = true;
+		$errormsg = DOBLE_POSTED;
+		$titulo = FATAL_ERROR_TITLE.ESP_TITULO;
+		return false;
+	}
+	
+	$string = $rup.$urlrez;
+
+	if (preg_match("@".$DOM_SCRIPT."/(site-img|js|images	)/@", $string)) {
+		unset($modo);
+		$modo = 1;
+		$spit = true;
+		$errormsg = NO_SELF_UPLOAD;
+		$titulo = CANT_UPLOAD_TITLE.ESP_TITULO;	
+		return false;
+	}
+	unset($string);
+	return true;
 }
 
 // Si hay urlrez, seteamos el modo rr
@@ -327,15 +279,6 @@ if (isset($v)) {
 	}
 }
 
-$string = $rup.$urlrez;
-
-if (preg_match("@".$DOM_SCRIPT."/(site-img|js|images	)/@", $string)) {
-	unset($modo);
-	$modo = 1;
-	$spit = true;
-	$errormsg = NO_SELF_UPLOAD;
-	$titulo = CANT_UPLOAD_TITLE.ESP_TITULO;	
-}
 
 /* HAGAMOS EL UPLOADING ---MODO 3--- */
 if ($modo==3) {
@@ -740,6 +683,50 @@ if ($modo==2 || $modo==3) {
 
 if (!isset($titulo)) {
 	$titulo = WELCOME;
+}
+
+function proccessErrors($echo=false)
+{
+global $errors;
+	if (!$errors[0]){
+		return false; // don't wanna run if there are no errors
+	}
+
+	$output = '<div id="errorBox">
+					<div class="errorInner">
+						<p class="errorText">An error ocured. I don\'t know what exacly but these where the error(s):</p>
+						<ul>';
+			foreach ($errors as $key => $error)
+			{
+				if ($key == 0) continue; //This is for something else, is true if there is an error
+				
+				$output .= "<li>"; //open up the li
+				
+					if (($key == 1) && is_array($error)){ //is there an array in the array? TODO: move $key == 1 to the line below
+						$output .= "<p class=\"errorText\">It looks like ther are some premissions errors, I can't access/write to these folders:</p>\n";
+						$output .= "<ul>";
+						foreach ($error as $key => $dir)
+						{
+							$output .= "<li>".$dir."</li>\n";
+						}
+						$output .= "</ul>\n";					
+					} else {
+					
+						$output .= $error;
+						$output .= "</li>\n";
+					}			
+				
+			}				
+	$output .= '	</ul>
+				</div>
+			</div>';
+				
+	if ($echo){
+		echo $output;
+	} else {
+		return $output;
+	}
+	
 }
 
 
