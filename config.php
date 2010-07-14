@@ -25,7 +25,7 @@ $config['keywords'] = 'images, photos, image hosting, photo hosting, free image 
 
 // Folders
 /* Most of the time you don't want to change this, if you do. Don't forget to update this. */
-$config['di']['im'] = 'images/';
+$config['dir']['im'] = 'images/';
 $config['dir']['up'] = 'up/';
 $config['dir']['working'] = $config['dir']['up'].'working/';
 $config['dir']['temp'] = $config['dir']['up'].'temp/';
@@ -48,12 +48,21 @@ $config['max_re_size'] = '1280'; // Max. resize value (pixels)
 
 // Options
 $config['same_domain'] = false; // true: Allows uploading just for your domain - false: Allows upload from anywhere (post from another website)
-$config['cut_url_service'] = 'tinyurl'; // tinyurl
 $config['cut_url_allow'] = true; // If $cut_url = true -> true: Allows your users to cut their urls (preference) - false: Users can't choose to cut or not.
 $config['allow_over_resize'] = false; // true: Allows over resize images - false: Don't allow over resize.
+$config['prefix'] = "chev_"; //prefx useded in any session or cookie actions (maybe later also db)
+
+//short url making
+$config['short_url']['selected'] = 'tinyurl'; // tinyurl is the default
+$config['short_url']['tinyurl'] = "http://tinyurl.com/api-create.php?url=";
+//to add more, just copy past tinyurl, and change its id, then update $config['short_url']['selected'] to the new id.
+
+$config['multi']['enabled'] = false;
+$config['multi']['noflash'] = false; //it is not recommanded to turn this on, only do it if you know 95% of your clients have no flash support 
+									// (eg: there all apple fan boys/girls)
 
 //debug
-$config['debug']['mode'] = false; // false: Debug OFF - true: Debug ON.
+$config['debug']['active'] = true; // false: Debug OFF - true: Debug ON.
 $config['debug']['system'] = 'print'; //options are print and firephp, print addss everything to the bottom op the page, firephp logs it using the firebug logger.
 
 ///////////////////////////////////////////////////////////////////
@@ -64,6 +73,7 @@ $config['debug']['system'] = 'print'; //options are print and firephp, print add
    If the script doesn't work, you must manually set this value. (look the example) */
 
 $DOM_SCRIPT = $_SERVER['SERVER_NAME']; // --> EXAMPLE: $DOM_SCRIPT = 'mysite.com'; FIXME: don't do this here, to engin with it!
+																				#	NOTE: @fixme maybe it is smart to have it here, but blank, eg: do if null in engin
 
 ///////////////////////////////
 /// DO NOT TOUCH BELOW THIS ///

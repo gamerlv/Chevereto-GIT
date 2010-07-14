@@ -20,6 +20,8 @@
 <body>
     <div>
         <?php
+        
+        /*
         function genRandomString($length=10,$timestamp=0) {
 			$characters = "0123456789abcdefghijklmnopqrstuvwxyz"; //the char we use
 			$len = strlen($characters) - 1; //get the total length(ammount of characters) of $characters
@@ -34,23 +36,30 @@
 			}
 			
 			return $string; //output the string.
+		}*/
+		
+		
+		if (isset($_FILES))
+		{
+			echo "<pre><code>";
+			
+			var_dump($_FILES);
+			
+			var_dump($_POST);
+			
+			echo "</code></pre>";
 		}
-        
-        	echo genRandomString(222)."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString(51,1)."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
-        	echo genRandomString()."<br />";
+		
         ?>
+        
+        <form action="" method="post" enctype="multipart/form-data">
+        	<p><input type="file" name="ufile[]" /></p>
+        	<p><input type="file" name="ufile[]" /></p>
+        	<p><input type="file" name="ufile[]" /></p>
+        	<p><input type="file" name="ufile[]" /></p>
+        	<p><input type="submit" /></p>
+        </form>
+        
     </div>
 </body>
 </html>
