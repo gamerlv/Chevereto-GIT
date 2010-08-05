@@ -22,8 +22,6 @@ define('SC_VERSION','NB2.0'); //FIXME: Final name of this version will be 1.0 or
 
 // Config
 require('config.php');
-include('lib/plugins.php'); //load up the plugins.
-setupPlugins(); 
 
 // Pseudo Debug NOTE: maybe change this to a func or move to boot up file?
 if(!$config['debug']['active']) {

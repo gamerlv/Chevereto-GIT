@@ -24,9 +24,7 @@ $config['description'] = $config['name'].' is a free image hosting service power
 $config['keywords'] = 'images, photos, image hosting, photo hosting, free image hosting';// For meta keywords| Google doesn't use this.
 
 // Folders
-/* Most of the time you don't want to change this, if you do. Don't forget to update this. 
-		!!USE CLOSING / ON ALL DIRS!!!
-*/
+/* Most of the time you don't want to change this, if you do. Don't forget to update this. */
 $config['dir']['im'] = 'images/';
 $config['dir']['up'] = 'up/';
 $config['dir']['working'] = $config['dir']['up'].'working/';
