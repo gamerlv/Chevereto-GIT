@@ -1,5 +1,5 @@
 <?
-
+global $spit, $config;
 /* -----------------------------------------
 
   Chevereto - Script de hosting de imagenes

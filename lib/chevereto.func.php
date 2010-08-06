@@ -32,6 +32,10 @@ if(!$config['debug']['active']) {
 } else {
 	error_reporting(E_ALL); //be prepeared to get a LOT of errors
 	include( BASEPATH . "/" . "lib/FirePHP.class.php");
+	
+	$firephp = FirePHP::getInstance(true);
+	$firephp->registerErrorHandler();
+	$firephp->registerExceptionHandler();
 }
 
 // Critital error box
@@ -58,7 +62,7 @@ function check_dir_permissions($dir) {
 # Creator: Gamerlv
 ##/doc
 function check_everything(){
-	global $config, $errors;
+	global $config, $errors, $DOM_SCRIPT;
 
 	// Check Permissions
 	foreach ($config['dir'] as $key => $dir)
@@ -202,7 +206,14 @@ if (isset($url)) {
 	} else {
 		$rup = str_replace(' ', '', $remote_up_url);
 	}
-
+##doc
+# Purpos: removes spaces from a string
+# Creator: Gamerlv
+##/doc
+function removeWhiteSpace($string)
+{
+	return str_replace(' ', '', $string);
+}
 // Si hay posteo / urleo
 if (isset($filesArray) || isset($remote_up_url) || isset($url)) {
 	if ($filesArray[size] ==! null || !empty($remote_up_url) || !empty($url)) {
