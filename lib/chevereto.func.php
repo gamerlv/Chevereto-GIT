@@ -38,7 +38,7 @@ if(!$config['debug']['active']) {
 	$firephp->registerExceptionHandler();
 }
 
-// Critital error box
+// Critital error box. depicrated
 $errors = array();
 $errors[0] = false; //NOTE: this shouldn't stay here, i guess
 $o_errorbox = '<div style="background: #F00; color: #FFF; font-family: Courier, monospace; font-weight: bold; padding: 1em; text-align: center;">';
@@ -99,6 +99,18 @@ function check_everything(){
 	}
 }
 
+function error($error_text, $title)
+{
+	global $modo, $spit, $errormsg, $titulo;
+
+	$modo = 1;
+	$spit = true;
+	$errormsg = $error_text;
+	$titulo = $title;	
+	
+	return true;
+}
+
 
 // DOCTITLE
 define('ESP_TITULO',' | '); //TODO: move to config
@@ -113,6 +125,7 @@ $v = $_GET['v'];  if ($v=='.htaccess') { unset($v); $v=''; }
 $page = $_GET['p'];
 $view_fld = $_GET['folder'];
 $resizr = $_GET['ancho']; // Resize via GET | NOTE: ancho is width
+$titulo = WELCOME;
 // SET Modo default
 // TODO: move to index.php
 if (!isset($modo))
@@ -215,6 +228,7 @@ function removeWhiteSpace($string)
 	return str_replace(' ', '', $string);
 }
 // Si hay posteo / urleo
+//TODO: move me to check_everything
 if (isset($filesArray) || isset($remote_up_url) || isset($url)) {
 	if ($filesArray[size] ==! null || !empty($remote_up_url) || !empty($url)) {
 		unset($modo);
@@ -331,16 +345,29 @@ if ($modo==3) {
 		// LA SUBIDA LOCAL
 		if ($filesArray['size'] ==! null) {
 			
-			copy($filesArray['tmp_name'], DIR_WORKING.$filesArray['name']);		
-			$tmp_name = $filesArray[name]; // Temp name
+			$tmp_name = moveLocalImage($filesArray['tmp_name']);
 		}
+		
+		##doc
+		# Purpos:  move the uploaded image from the /tmp folder to the chev working dir
+		# Creator: rodolfo
+		# Returns: name of file in chev working dir
+		##/doc
+		function moveLocalImage($tmp_name)
+		{
+			global $config, $filesArray;
+			copy($tmp_name, $config['dir']['working'].$filesArray['name']);		
+			return $filesArray['name'];
+		}
+		
+		/*
 		// LA SUBIDA REMOTA
 		if (!empty($rup)) {
 			// Veamos si viene del resize
 			$grabname = substr("$rup", -21); // up/temp/000000000.jpg
 			if (file_exists($grabname)) {
 				$tmp_name = substr("$rup", -13);
-				rename($grabname, DIR_WORKING.$tmp_name);
+				rename($grabname, $config['dir']['working'].$tmp_name);
 			} else {
 				// GET A NAME
 				$partes = explode('/', $rup);
@@ -358,11 +385,11 @@ if ($modo==3) {
 				$rup_parse = parse_url($rup);
 				$rup_temp = substr($rup_parse['path'], 1);
 				
-				if (preg_match("@".DIR_TEMP."@", $rup_temp)) {
+				if (preg_match("@".$config['dir']['temp']."@", $rup_temp)) {
 					$delete_temp = true;
 				}
 								
-				$out = fopen(DIR_WORKING.$rname, 'wb');
+				$out = fopen($config['dir']['working'].$rname, 'wb');
 				curl_setopt($ch, CURLOPT_FILE, $out);
 				// grab
 				$resultado = curl_exec($ch);
@@ -371,27 +398,79 @@ if ($modo==3) {
 				$tmp_name = $rname;
 				}
 		} // remota
+		*/
+		
+		##doc
+		# Purpos:  Get an image from a remote site.
+		# Creator: Gamerlv & rodolfo
+		# Returns: 
+		##/doc
+		function getRemote($url)
+		{
+			global $config;
+			// Veamos si viene del resize
+			// Let's see if the resize is
+			$grabname = substr("$url", -21); // up/temp/000000000.jpg
+			if (file_exists($grabname)) {
+				$tmp_name = substr("$url", -13);
+				rename($grabname, $config['dir']['working'].$tmp_name);
+			} else {
+				// GET A NAME
+				$parts = explode('/', $url);
+				$rname = $parts[count($parts) - 1];		
+				// Conectando
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL,$url);
+				curl_setopt($ch, CURLOPT_HEADER, false);
+				curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+				set_time_limit(300); // 5 Min. PHP
+				curl_setopt($ch, CURLOPT_CONNECTTIMEOUT,300); // 5 Min.cURL
+				curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 6.0; es-ES; rv:1.9.0.6) Gecko/2010071120 Firefox/3.6.8');
+				
+				$url_parse = parse_url($url);
+				$url_temp = substr($url_parse['path'], 1);
+				
+				if (preg_match("@".$config['dir']['temp']."@", $url_temp)) {
+					$delete_temp = true;
+				}
+								
+				$out = fopen($config['dir']['working'].$rname, 'wb');
+				curl_setopt($ch, CURLOPT_FILE, $out);
+				// grab
+				$resultado = curl_exec($ch);
+				fclose($out);
+				curl_close($ch);
+				$tmp_name = $rname;
+				}
+				$output = array (
+					'name' => $tmp_name,
+					'image' => $resultado );  //hack to get return to work
+				return $output;
+		}
 			
 		// Manejemos la temporal
-		$handlework = DIR_WORKING.$tmp_name;
+		//temp var
+		$handlework = $config['dir']['working'].$tmp_name;
 		
 		$info = getimagesize($handlework);
 		
 		// Otras lecturas
+		//Further reading
 		$statinfo = @stat($handlework);
 		$tamano = $statinfo['size']; // BYTES
 		$tamano_kb = round($tamano/1024,2);
-		$mimosa = $info['mime']; // SI POR LA CONCHETUMADRE
-		$ancho = $info[0]; // Fijate en esto!
-		$alto = $info[1];
+		$mimosa = $info['mime']; // SI POR LA CONCHETUMADRE //?
+		$ancho = $info[0]; // Fijate en esto! //look at this, width
+		$alto = $info[1]; //top
 		$mime = $info['mime'];
 
-		if (!$ancho || !$alto || !$mime || !$tamano) { // Fallan esas leseras
+		if (!$ancho || !$alto || !$mime || !$tamano) { // Fallan esas leseras //this fails they cant all be false
 			$invalida = true;
 			$inv_txt = INVALID_CORRUPT;
 			$no = true; 
 		}
-		if ($tamano > $max_by) { // Muy pesada
+		if ($tamano > $max_by) { // Muy pesada // we're too big
 			$peso = true;
 			$no = true;
 		}
@@ -520,7 +599,7 @@ if ($modo==3) {
 			}
 			
 			// Target -> Archivo a redimensionar (handlework)
-			// Archivo -> Archivo work (DIR_WORKING.$name)
+			// Archivo -> Archivo work ($config['dir']['working'].$name)
 			function redimensionar($tipo,$target,$archivo,$ancho_n,$alto_n) {
 				
 				/* TODO agregar un handle pa esta wea cuando se cae */
@@ -571,27 +650,27 @@ if ($modo==3) {
 			}
 			if ($red==1) {
 				// Correr la funcion redimensionamiento *img en el working
-				redimensionar($exten,$handlework,DIR_WORKING.$name,$ancho,$alto);
+				redimensionar($exten,$handlework,$config['dir']['working'].$name,$ancho,$alto);
 						
 				// Mover la redimensionada
-				copy(DIR_WORKING.$name, DIR_IM.$name);
+				copy($config['dir']['working'].$name, DIR_IM.$name);
 				$titulo = UPLOAD_AND_RESIZED.ESP_TITULO;
 								
 				// Borramos
-				unlink(DIR_WORKING.$name);
+				unlink($config['dir']['working'].$name);
 				if($delete_temp==true) { unlink($rup_temp); }
 
 			}
 			if ($red==2) {
 				// No red correcto, renombra la temp (vea si esta)
-				$tname = DIR_TEMP.$name;			
-				if (file_exists(DIR_TEMP.$name)) {
+				$tname = $config['dir']['temp'].$name;			
+				if (file_exists($config['dir']['temp'].$name)) {
 					$numletra = ereg_replace("[^[:alnum:]]","",$name);
 					$cleartemp = substr_replace($numletra, '', -3); // sin extension ni punto
 					$randtemp = rand(000,999);
-					$tname = DIR_TEMP.$cleartemp.$randtemp.'.'.$exten;						
+					$tname = $config['dir']['temp'].$cleartemp.$randtemp.'.'.$exten;						
 				} else {
-					$tname = DIR_TEMP.$name;
+					$tname = $config['dir']['temp'].$name;
 				}
 				rename($handlework, $tname);
 				$URLrdn = URL_SCRIPT.$tname;
@@ -621,11 +700,14 @@ if ($modo==3) {
 		}
 	
 	} else { // Check local + remote 
-		unset($modo);
+		/*unset($modo);
 		$modo = 1;
 		$spit = true;
 		$errormsg = CRITIC_ERROR_INPUT;
-		$titulo = ERROR_UPLOADING.ESP_TITULO;
+		$titulo = ERROR_UPLOADING.ESP_TITULO;*/
+		
+		//what is better? above or below?
+		error(CRITIC_ERROR_INPUT, ERROR_UPLOADING.ESP_TITULO);
 	}
 		
 }
@@ -648,11 +730,7 @@ if ($modo==2 || $modo==3) {
 						$tamano_kb = round($tamano*0.0009765625, 2);
 					$canales = $info['channels'];
 			} else {
-				unset($modo);
-				$modo = 1;
-				$spit = true;
-				$errormsg = NOT_EXISTS;
-				$titulo = NOT_EXISTS_TITLE.ESP_TITULO;
+				error(NOT_EXISTS, NOT_EXISTS_TITLE.ESP_TITULO);
 			}
 		}
 	}
@@ -677,10 +755,10 @@ if ($modo==2 || $modo==3) {
 	}
 	
 	// SI esta habilitado cortar url.. hagamolo.
-	if ($cut_url==true) {
+	if ( $config['cut_url_enabled'] == true ) {
 		
 		// Si se da a elegir al usuario, cortemos si el quiere.
-		if ($cut_url_user==true) {
+		if ( $config['cut_url_allow'] == true ) {
 			// El usuario quiere cortar url...
 			if (isset($_COOKIE['prefurl'])) {
 				$ShortURL = cortar_url($URLimg);

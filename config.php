@@ -51,7 +51,8 @@ $config['max_re_size'] = '1280'; // Max. resize value (pixels)
 
 // Options
 $config['same_domain'] = false; // true: Allows uploading just for your domain - false: Allows upload from anywhere (post from another website)
-$config['cut_url_allow'] = true; // If $cut_url = true -> true: Allows your users to cut their urls (preference) - false: Users can't choose to cut or not.
+$config['cut_url_enabled'] = true; //if false no url at all will be cut (shortened)
+$config['cut_url_allow'] = true; // If $cut_url = true -> true: Allows your users to cut their urls (preference) - false: Users can't choose to cut or not. It will always be cut
 $config['allow_over_resize'] = false; // true: Allows over resize images - false: Don't allow over resize.
 $config['prefix'] = "chev_"; //prefx useded in any session or cookie actions (maybe later also db)
 
@@ -68,7 +69,7 @@ $config['plugins'] = ""; //Add only the filename. like so: file called: example.
 
 //debug
 $config['debug']['active'] = true; // false: Debug OFF - true: Debug ON.
-$config['debug']['system'] = 'print'; //options are print and firephp, print addss everything to the bottom op the page, firephp logs it using the firebug logger.
+$config['debug']['system'] = 'print'; //options are print and firephp, print adds everything to the bottom op the page, firephp logs it using the firebug logger.
 
 ///////////////////////////////////////////////////////////////////
 ///// DO NOT EDIT BELOW THIS - (do it if the script can't run) ////

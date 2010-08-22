@@ -26,15 +26,16 @@ $plugins = array(
 	);
 */
 
-public function setupPlugins()
+function setupPlugins()
 {
-	global $settings, $plugins;
+	global $config, $plugins;
 	
 	/*
 	we in hell did i gave them a chose of these 2?
 	maybe just use , ?
-	then i can write explode($config['plugins'] ,',') in the array.... w/e :D$plugins['path']
+	then i can write explode($config['plugins'] ,',') in the array.... w/e :D  $plugins['path']
 	*/
+	if ($config['plugins'] == "") {echo "<!--debug: No plugins to load, aborting -->"; return false;}
 	
 	if (strpos($config['plugins'], ",")){
 		$pluginArray = explode($config['plugins'] ,',');
@@ -62,7 +63,7 @@ public function setupPlugins()
 	foreach ($foundPlugins as $key => $file)
 	{
 		$lower = strtolower($file); // is this smart?
-		$fileNoExt = substr($lower, -strlen($plugins['ext'])); // i don need the ext. just give me the base filename. (that's with out plugin.php)
+		$fileNoExt = substr($lower, -strlen($plugins['ext'])); // i dont need the ext. just give me the base filename. (that's with out plugin.php)
 		if (in_array($plugins['active'], $fileNoExt))
 		{
 			$pluginsNeedingLoad += array( //wtf is += acctualy? idk, but still use it :D
@@ -80,7 +81,7 @@ public function setupPlugins()
 return true;
 }
 
-public function getFiles($folder, $ext=null)
+function getFiles($folder, $ext=null)
 {
 	if ($foldername = opendir($folder)) {
 	  while (false !== ($filename = readdir($foldername))) {
@@ -93,7 +94,7 @@ public function getFiles($folder, $ext=null)
 return $files;
 }
 
-public function loadPlugins($plugins)
+function loadPlugins($plugins)
 {
 	if (!defined(BASEPATH)){die('no base path');return false;} //make sure we have a base path. or we cant include
 	if (!is_array($plugins)) {return false;	} // not an array? crap, cant do shit then.
@@ -110,7 +111,7 @@ public function loadPlugins($plugins)
 
 //ofc we need to be able to run all triggers
 //TODO: add all trigers to chevereto.func.php .
-public function trigger($action, $extraparams=null)
+function trigger($action, $extraparams=null)
 {
 	global $plugins; //add a outside var for var store	
 	$html = ""; // I dont know if this will work. but buffer all echo's and echo it all at once
@@ -126,8 +127,8 @@ echo $html;
 return true;
 }
 
-//basic fucn to just add a plugin to the trigger list.
-public function registerTrigger($pluginName=[] ,$trigger, $function)
+//basic func to just add a plugin to the trigger list.
+function registerTrigger($pluginName ,$trigger, $function)
 {
 	global $plugins;
 	$plugins['triggers'][$trigger] += array(
@@ -135,15 +136,16 @@ public function registerTrigger($pluginName=[] ,$trigger, $function)
 		);
 return true;	
 }
-public function registertrigger($pluginName=[] ,$trigger, $function)
+/* so not case-sensitive after all
+function registertrigger($pluginName ,$trigger, $function)
 {
 	//wrapper. I KNOW YOU CANT SPELL
 	registerTrigger($pluginName ,$trigger, $function);
 	return true;
-}
+}*/
 
 //may be handy. db settings anyone?
-public function loadSettings($pluginName,$var="all")
+function loadSettings($pluginName,$var="all")
 {
 	global $plugins;
 	$settingsFile = $plugins['path'].$pluginName . "/" . "settings.txt";
@@ -154,7 +156,7 @@ public function loadSettings($pluginName,$var="all")
 	return $data;
 }
 
-public function saveSettings($pluginName, $data, $overwrite = false)
+function saveSettings($pluginName, $data, $overwrite = false)
 {
 	global $plugins;
 	$settingsFile = $plugins['path'].$pluginName . "/" . "settings.txt";
