@@ -17,9 +17,6 @@ function error() {
 		});	*/
 		
 	//Redo if someone tried to resize a image above or below the max/min size
-	$('#resize').focus(function(){
-		$(this).parent().parent().stop(true,true).effect("highlight", {}, 1500);
-	});
 	$('#redo').click(function(){
 		$(this).toggle();
 		$('#enviando').toggle();
@@ -69,13 +66,17 @@ function upload() {
 		$resize = $('#resize'),
 		$ropen = $('a#ropen'),
 		$rclose =$('a#rclosed'),
-		$progBar = $('#enviando');
+		$progBar = $('#enviando'),
+		$tabid = $('#tabIdentifier');
+		
+		
 	//Switch to the remote tab
 	$remoteT.click(function(){
 		$('#subir_local').fadeOut(.5);
 		$('#subir_remota').wait(.5).fadeIn("slow");
 		$('#linklocal').toggle();
 		$('#linkremota').toggle();
+		$tabid.attr('value',"remote");
 		$('#remotaUP').focus();
 	});
 	//switch to the local tab	
@@ -84,11 +85,8 @@ function upload() {
 		$('#subir_local').wait(.5).fadeIn("slow");
 		$('#linklocal').toggle();
 		$('#linkremota').toggle();
+		$tabid.attr('value',"local");
 		$('#localUP').focus();
-	});
-	//clicked effect on upload bar
-	$uploadDiv.click(function(){
-		$uploadDiv.stop(true,true).effect("highlight", {}, 1500);
 	});
 	//open resize box
 	$rclose.click(function(){
@@ -101,10 +99,6 @@ function upload() {
 		$(this).toggle();
 		 $rclose.toggle();
 		$('#redimensionar-borde').slideUp("slow");
-	});
-	//highlight effect on upload box
-	$resize.click(function(){
-		$(this).parent().stop(true,true).effect("highlight", {}, 1500);
 	});
 	//and fade out the upload button if pressed
 	$uploadBtn.click(function(){

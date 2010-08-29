@@ -16,8 +16,12 @@
 //setup the basepath. aka, where this script runs from.(wih this i mean index.php)
 define('BASEPATH', getcwd() );
 //load up the lib
+require_once(BASEPATH . '/lib/chevereto.class.php');
+$chevereto = new chevereto();
+$chevereto->init();
+/*
 require('lib/chevereto.func.php');
-check_everything();
+check_everything();*/
 
 //ES
 // DETERMINAMOS QUE MOSTRAMOS Y HACEMOS

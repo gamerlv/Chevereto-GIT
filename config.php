@@ -18,14 +18,14 @@ $config['lang'] = 'en'; // en - English | es - Español | fa - Farsi | fr - Franç
 
 
 // App
-$config['name'] = 'Chevereto NB 2.0';  // Your image hosting name
+$config['name'] = 'Chevereto NB 2.1';  // Your image hosting name
 $config['slang'] = 'Image Hosting';// Your tagline (for doctitles and logo)
 $config['description'] = $config['name'].' is a free image hosting service powered by Chevereto'; // For meta description
 $config['keywords'] = 'images, photos, image hosting, photo hosting, free image hosting';// For meta keywords| Google doesn't use this.
 
 // Folders
 /* Most of the time you don't want to change this, if you do. Don't forget to update this. 
-		!!USE CLOSING / ON ALL DIRS!!!
+		!!USE CLOSING SLASH (/) ON ALL DIRS!!!
 */
 $config['dir']['im'] = 'images/';
 $config['dir']['up'] = 'up/';
@@ -66,7 +66,7 @@ $config['multi']['enabled'] = false;
 $config['multi']['noflash'] = false; //it is not recommanded to turn this on, only do it if you know 95% of your clients have no flash support 
 									// (eg: there all apple fan boys/girls)
 $config['plugins'] = ""; //Add only the filename. like so: file called: example.plugin.php you enter example. 
-						//To add more then one sepereate by comma (,) or pipe (|).
+						//To add more then one sepereate by comma (,).
 
 //debug
 $config['debug']['active'] = true; // false: Debug OFF - true: Debug ON.

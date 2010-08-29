@@ -45,7 +45,19 @@
 			
 			echo var_dump($_FILES);
 			
-			echo var_dump($_POST);
+		$files = $_FILES['ufile'];
+		$image = array();
+			foreach ($files as $datakey => $array)
+			{
+				foreach ($array as $id => $data)
+				{
+					$image[$id] = array (
+						$datakey => $data,
+					);
+				}
+			}
+			echo "\n\n\n\n";
+			echo var_dump($image);
 			
 			echo "</code></pre>";
 		}

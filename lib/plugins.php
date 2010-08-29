@@ -35,14 +35,13 @@ function setupPlugins()
 	maybe just use , ?
 	then i can write explode($config['plugins'] ,',') in the array.... w/e :D  $plugins['path']
 	*/
-	if ($config['plugins'] == "") {echo "<!--debug: No plugins to load, aborting -->"; return false;}
+	if ($config['plugins'] == "") {echo "<!--DEBUG: No plugins to load, aborting -->"; return false;}
 	
 	if (strpos($config['plugins'], ",")){
 		$pluginArray = explode($config['plugins'] ,',');
-	} elseif (strpos($config['plugins'], '|')){
-		$pluginArray = explode($config['plugins'] ,'|');
+	} else {
+		$pluginArray[0] = $config['plugins']; //to prevent erros with just one plugin on.
 	}
-	
 	$plugins = array(
 		'active' => $pluginArray,
 		'inActive' => array(),
@@ -54,6 +53,7 @@ function setupPlugins()
 			'afterRender' => array(),
 			'beforeSave' => array(),
 			'afterSave' => array(),
+			'onThumbGenaration' => array(),
 			'beforeResize' => array(),
 			'afterResize' => array(), 
 		),
@@ -110,10 +110,11 @@ function loadPlugins($plugins)
 }
 
 //ofc we need to be able to run all triggers
-//TODO: add all trigers to chevereto.func.php .
+//TODO: add all trigers to chevereto.
 function trigger($action, $extraparams=null)
 {
 	global $plugins; //add a outside var for var store	
+	if (! isset($plugins['triggers'][$action][0])) return true; //nothing to do.
 	$html = ""; // I dont know if this will work. but buffer all echo's and echo it all at once
 	foreach ($plugins['triggers'][$action] as $pluginName => $function)
 	{
@@ -177,4 +178,6 @@ function saveSettings($pluginName, $data, $overwrite = false)
 	fclose($handle);
 	
 }
+
+#TODO: add functions for extra header/footer.
 ?>
