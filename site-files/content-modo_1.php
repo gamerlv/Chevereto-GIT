@@ -5,12 +5,14 @@
     	<div class="btn_local"><a class="local" id="linklocal" style="display: none;"></a></div>
         <div class="btn_remoto"><a class="remota" id="linkremota"></a></div>
     </div>
-<? if ($cut_url==true && $cut_url_user==true) { ?><div id="preferencias"<? if (isset($lang)) { echo ' class="'.$lang.'"'; } ?>><a id="pclosed"><span><?php echo TXT_PREFERENCES;?></span></a><a id="popen" style="display:none;"><span><?php echo TXT_PREFERENCES;?></span></a></div><? } ?> 
+<? if ($config['cut_url_enabled'] && $config['cut_url_allow']) { ?><div id="preferencias"<? if (isset($lang)) { echo ' class="'.$lang.'"'; } ?>><a id="pclosed"><span><?php echo TXT_PREFERENCES;?></span></a><a id="popen" style="display:none;"><span><?php echo TXT_PREFERENCES;?></span></a></div><? } ?> 
 </div> <!-- selector -->
 	
 	<form id="form_up" enctype="multipart/form-data" action="<?php echo PATH_SCRIPT;?>" method="post">
-
-	<? if ($cut_url==true && $cut_url_user==true) { ?>
+	<!-- what tab are we on? -->
+	<input type="hidden" value="local" name="tab" id="tabIdentifier" />
+	
+	<? if ($config['cut_url_enabled'] && $config['cut_url_allow']) { ?>
 	<div id="pref-panel" style="display: none;"><div id="cajon-pref"><p id="prefurl"><input name="" type="checkbox" id="cortarurl" value="" <? if(isset($_COOKIE['prefurl'])) { ?>checked="checked"<? } ?> /><label for="cortarurl"> <?php echo TXT_TINYURL;?></label></p><div id="save"><a id="savepref" /><?php echo TXT_CLOSE_PREF;?></a></div></div></div>  
     <? } ?>
 

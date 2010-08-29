@@ -1,5 +1,7 @@
 <?
 global $spit, $config;
+include_once(BASEPATH . '/site-files/compt.php');
+trigger('beforeRender');
 /* -----------------------------------------
 
   Chevereto - Script de hosting de imagenes
@@ -21,7 +23,7 @@ global $spit, $config;
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php echo LANG;?>" lang="<?php echo LANG;?>">
 <head>
 
-<meta name="generator" content="Chevereto <?php echo SC_VERSION;?>" /><!-- LET IT BIT! -->
+<meta name="generator" content="Chevereto <?php echo $chevereto->version(); ?>" /><!-- LET IT BIT! -->
 
 <title><? echo $titulo.' ' . $config['name'];?> - <?php echo $config['slang'];?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -54,7 +56,7 @@ $(document).ready(function(){
 	 if ($modo==3) { 				echo "process(); \n"; } 
 	 if ($modo==2) { 				echo "viewer(); \n"; } 
 	 if ($modo==2 || $modo==3) { 	echo "social(); \n"; } 
-	 if ($cut_url && $modo==1) { 	echo "pref(); \n"; } 
+	 if ($config['cut_url_enabled'] && $modo==1) { 	echo "pref(); \n"; } 
 	?>
 });
 // ]]>
@@ -72,12 +74,13 @@ $(document).ready(function(){
 <?php
 //it looks nice here
 //these are the admin/setup errors.
+/*
 if ($errors[0]){
 	echo "<div id=\"errorWrapper\">\n";
 	echo proccessErrors();
 	echo "</div>\n";
 	die();
-	}
+	}*/
 ?>
 
 <div id="top">
@@ -87,19 +90,18 @@ if ($errors[0]){
     <div id="tagline"><?php echo $config['slang'];?></div><div id="limite">JPG PNG BMP GIF <span>Max.<?php echo $config['max_filesize'];?>Mb</span></div>
 </div>
 
-<? if ($spit==true) { ?>
+<? if ($error->gotErrors()) { ?>
 <!--The are the client/ upload errors -->
-<h1 id="error"><span><?php echo $errormsg?></span></h1>
-<? } 
-
-	 if (!$modo==2 && !$modo==3 && !isset($page)) {
-	 	echo BASEPATH.'site-files/content-modo_'.$modo.'.php';
-		include(BASEPATH.'site-files/content-modo_'.$modo.'.php');
-	 } elseif ($modo==2 || $modo==3) {
-	 	include(BASEPATH.'site-files/content-modo_3-4.php');
+<h1 id="error"><span><?php echo $error->spitError; ?></span></h1>
+<? }
+		 
+	 if ( ($modo==2 || $modo==3) && !isset($page)) {
+	 	include(BASEPATH.'/site-files/content-modo_3-4.php');
 	 } elseif (isset($page)) {
-	 	include(BASEPATH.'site-files/content-modo_static.php');
-	 } 
+	 	include(BASEPATH.'/site-files/content-modo_static.php');
+	 } else {
+	 	include(BASEPATH.'/site-files/content-modo_'.$modo.'.php');
+	 }
 ?>
 
 </div> <!-- contenido -->
@@ -107,7 +109,7 @@ if ($errors[0]){
 <div id="foot">
 		<div class="foot-d2">
 		<!-- NOTE: maybe base64 encode? and move to lib? (to prevent pp removing) -->
-			<?php echo APP_NAME;?>, Powered by <a href="http://chevereto.com/" target="_blank">Chevereto</a>
+			<?php echo $config['name'];?>, Powered by <a href="http://chevereto.com/" target="_blank">Chevereto Version: <?php echo $chevereto->version();?></a>
 		</div>
 		<?php
 		if (isset($extra['footer']))
@@ -117,3 +119,6 @@ if ($errors[0]){
 
 </body>
 </html>
+<?php
+	trigger('afterRender');
+?>

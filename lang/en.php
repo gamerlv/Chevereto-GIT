@@ -18,7 +18,7 @@
 define('WELCOME', 'Welcome to');
 
 // MENSAJES CRITICOS
-define('ERROR_REF', 'Invalid access, use the home page of <a href="'.URL_SCRIPT.'" style="color: #FFF;">'.APP_NAME.'</a> to upload images.');
+define('ERROR_REF', 'Invalid access, use the home page of <a href="'.URL_SCRIPT.'" style="color: #FFF;">'.$config['name'].'</a> to upload images.');
 define('CANT_RUN', 'Impossible to upload images, Chevereto is not well configured or can not run on this server.');
 define('CRITIC_ERROR_INPUT', 'fatal error, check your data');
 define('ERROR_UPLOADING', 'Error uploading the image');
