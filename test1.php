@@ -43,9 +43,9 @@
 		{
 			echo "<pre><code>";
 			
-			var_dump($_FILES);
+			echo var_dump($_FILES);
 			
-			var_dump($_POST);
+			echo var_dump($_POST);
 			
 			echo "</code></pre>";
 		}

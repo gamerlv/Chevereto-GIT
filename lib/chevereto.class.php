@@ -11,6 +11,7 @@ class chevereto
 	#	internal variables
 	var $title = "";
 	var $lang = "eng";
+	var $image = array(); //the image object. will contain all image dat. e.g: filename, tmp name, size.
 	
 	#	Constructor
 	function __construct ()

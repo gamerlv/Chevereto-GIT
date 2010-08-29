@@ -8,7 +8,7 @@
 /* -----------------------------------------
 
   Chevereto - Script de hosting de imagenes
-  Nightly Build 2.0 (25/07/2010)
+  Nightly Build 2.1 (30/12/2010)
   http://www.chevereto.com/
 
   Released under the GPL 2.0
@@ -18,12 +18,12 @@
   ----------------------------------------- */
 
 // VERSION DEL SCRIPT
-define('SC_VERSION','NB2.0'); //FIXME: Final name of this version will be 1.0 or 2.0. No nightly
+define('SC_VERSION','NB2.1'); //FIXME: Final name of this version will be 2.0. No nightly
 
 // Config
-require('config.php');
-include('lib/plugins.php'); //load up the plugins.
-setupPlugins(); 
+require_once(BASEPATH . '/config.php');
+include_once(BASEPATH . '/lib/plugins.php'); //load up the plugins.
+$pluginsStart = setupPlugins(); unset($pluginsStart);
 
 // Pseudo Debug NOTE: maybe change this to a func or move to boot up file?
 if(!$config['debug']['active']) {
@@ -99,11 +99,11 @@ function check_everything(){
 	}
 }
 
-function error($error_text, $title)
+function error($error_text, $title, $setMode=1)
 {
 	global $modo, $spit, $errormsg, $titulo;
 
-	$modo = 1;
+	$modo = $setMode;
 	$spit = true;
 	$errormsg = $error_text;
 	$titulo = $title;	
@@ -125,16 +125,15 @@ $v = $_GET['v'];  if ($v=='.htaccess') { unset($v); $v=''; }
 $page = $_GET['p'];
 $view_fld = $_GET['folder'];
 $resizr = $_GET['ancho']; // Resize via GET | NOTE: ancho is width
-$titulo = WELCOME;
+//$titulo = WELCOME;
+$image = array();
 // SET Modo default
 // TODO: move to index.php
 if (!isset($modo))
 	$modo = 1;
 
-
 // SHORT URL SERVICE
-function short_url_setup()
-{
+function short_url_setup() {
 	global $config, $tiny_service, $tiny_api;
 		$tiny_service = $config['short_url']['selected'];
 		$tiny_api = $config['short_url'][$tiny_service];
@@ -230,42 +229,29 @@ function removeWhiteSpace($string)
 // Si hay posteo / urleo
 //TODO: move me to check_everything
 if (isset($filesArray) || isset($remote_up_url) || isset($url)) {
-	if ($filesArray[size] ==! null || !empty($remote_up_url) || !empty($url)) {
+	if ($filesArray['size'] ==! null || !empty($remote_up_url) || !empty($url)) {
 		unset($modo);
 		$modo = 3;
 	} else {
-		unset($modo);
-		$modo = 1;
-		$spit = true;
-		$errormsg = FORM_INCOMPLETE;
-		$titulo = TITLE_FORM_INCOMPLETE.ESP_TITULO;
+		error(FORM_INCOMPLETE, TITLE_FORM_INCOMPLETE.ESP_TITULO);
 	}
 }
 
-function check_uploaded()
+function check_uploaded($rup, $filesArray)
 {
-	global $spit,$DOM_SCRIPT,$modo,$errormsg,$titulo,$rup,$urlrez;
+	global $DOM_SCRIPT,$urlrez;
 	// SI HAY DOBLE POSTEO...
 	//check if not both are set
 	if (!empty($rup) && !empty($filesArray['type'])) {
-	return false;
 	//TODO: move this to the function calling
-		unset($modo);
-		$modo = 1;
-		$spit = true;
-		$errormsg = DOBLE_POSTED;
-		$titulo = FATAL_ERROR_TITLE.ESP_TITULO;
+		error(DOBLE_POSTED, FATAL_ERROR_TITLE.ESP_TITULO);
 		return false;
 	}
 	
 	$string = $rup.$urlrez;
 
-	if (preg_match("@".$DOM_SCRIPT."/(site-img|js|images	)/@", $string)) {
-		unset($modo);
-		$modo = 1;
-		$spit = true;
-		$errormsg = NO_SELF_UPLOAD;
-		$titulo = CANT_UPLOAD_TITLE.ESP_TITULO;	
+	if (preg_match("@".$DOM_SCRIPT."/(site-img|js|images)/@", $string)) {
+		error(NO_SELF_UPLOAD, CANT_UPLOAD_TITLE.ESP_TITULO);	
 		return false;
 	}
 	unset($string);
@@ -300,9 +286,7 @@ if (isset($v)) {
 		$modo = 2;
 		$name = $v;
 	} else {
-		$spit = true;
-		$errormsg = NO_ID;
-		$titulo = NO_ID_TITLE.ESP_TITULO;
+		error(NO_ID, NO_ID_TITLE.ESP_TITULO);
 	}
 }
 
@@ -449,69 +433,70 @@ if ($modo==3) {
 				return $output;
 		}
 			
+		function getimageinfo($handlework){
 		// Manejemos la temporal
 		//temp var
-		$handlework = $config['dir']['working'].$tmp_name;
+			//$handlework = $config['dir']['working'].$tmp_name;
 		
-		$info = getimagesize($handlework);
+			$info = getimagesize($handlework);
 		
-		// Otras lecturas
-		//Further reading
-		$statinfo = @stat($handlework);
-		$tamano = $statinfo['size']; // BYTES
-		$tamano_kb = round($tamano/1024,2);
-		$mimosa = $info['mime']; // SI POR LA CONCHETUMADRE //?
-		$ancho = $info[0]; // Fijate en esto! //look at this, width
-		$alto = $info[1]; //top
-		$mime = $info['mime'];
+			// Otras lecturas
+			//Further reading
+			$statinfo = @stat($handlework);
+			$tamano = $statinfo['size']; // BYTES
+			$tamano_kb = round($tamano/1024,2); $info['tamano_kb'] = $tamano_kb;
+			$mimosa = $info['mime']; // SI POR LA CONCHETUMADRE //?
+			$ancho = $info[0]; $info['ancho'] = $info[0]; // Fijate en esto! //look at this, width
+			$alto = $info[1]; $info['alto'] = $info[1]; //top
 
-		if (!$ancho || !$alto || !$mime || !$tamano) { // Fallan esas leseras //this fails they cant all be false
-			$invalida = true;
-			$inv_txt = INVALID_CORRUPT;
-			$no = true; 
-		}
-		if ($tamano > $max_by) { // Muy pesada // we're too big
-			$peso = true;
-			$no = true;
-		}
-			
-		// Manejemos el mime tipe para los "amigos" que usan otras extensiones...
-		if ($mimosa=="image/gif") { $exten = 'gif'; }
-		if ($mimosa=="image/pjeg") { $exten = 'jpg'; }
-		if ($mimosa=="image/jpeg") { $exten = 'jpg'; }
-		if ($mimosa=="image/png") { $exten = 'png'; }
-		if ($mimosa=="image/bmp") { $exten = 'bmp'; }
-		
-		if (!isset($no)) {
-			$up = true;
-		}
-		
-		if ($no==true) {
-			// Eliminamos la imagen del up/working..
-			unlink($handlework);
-
-			$spit = true;
-			unset($modo);
-			$modo = 1;
-			if ($peso==true) {
-				$pes_txt = TOO_HEAVY.' ('.$max_mb.'MB max.)';
+			if (!$ancho || !$alto || !$mimosa || !$tamano) { // Fallan esas leseras //this fails they cant all be false
+				$invalida = true;
+				$inv_txt = INVALID_CORRUPT;
+				$no = true; 
 			}
-			if ($peso==true && $invalida==true) {
-				$ademas = ' '.ANDTEXT.' ';
-				$errormsg = $pes_txt.$ademas;
-			} else {
-				$errormsg = INVALID_EXT;
+			if ($tamano > $max_by) { // Muy pesada // we're too big
+				$peso = true;
+				$no = true;
 			}
 			
+			// Manejemos el mime tipe para los "amigos" que usan otras extensiones...
+			if ($mimosa=="image/gif") { $exten = 'gif'; }
+			if ($mimosa=="image/pjeg") { $exten = 'jpg'; }
+			if ($mimosa=="image/jpeg") { $exten = 'jpg'; }
+			if ($mimosa=="image/png") { $exten = 'png'; }
+			if ($mimosa=="image/bmp") { $exten = 'bmp'; }
+			$info['exten'] = $exten;	
+		
+			if (!isset($no)) {
+				$info['up'] = true;
+			}
+		
+			if ($no==true) {
+				// Eliminamos la imagen del up/working..
+				unlink($handlework);
+
+
+				if ($peso==true) {
+					$pes_txt = TOO_HEAVY.' ('.$max_mb.'MB max.)';
+				}
+				if ($peso==true && $invalida==true) {
+					$ademas = ' '.ANDTEXT.' ';
+					error($pes_txt.$ademas, ERROR); //too big, error out.
+				} else {
+					error(INVALID_EXT, ERROR); //invalid extention error out.
+				}
+			} // end no!
 			
-			
-			
-		} // no!
+			$info['no'] = $no;
+			return $info;
+		} //end func getimageinfo
+		
+		$image['info'] = getimageinfo($config['dir']['working'].$tmp_name);
 		
 		// Hay subida compadre...
-		if ($up) {
+		if ($image['info']['up']) {
 			
-			//gen random name
+			//gen random image name
 			function genRandomString($length=10,$timestamp=0) {
 				$characters = "0123456789abcdefghijklmnopqrstuvwxyz"; //the char we use
 				$len = strlen($characters) - 1; //get the total length(ammount of characters) of $characters
@@ -526,15 +511,20 @@ if ($modo==3) {
 				return $string; //output the string.
 			}    
 			
-			/* TODO opciones de renombre */
+			/* TODO: opciones de renombre */
+			/* TODO: renowned options */
 			
 			// Limpiemos el nombre
 			// --> Tambien me quedo "super rico".
 			$lower = strtolower($tmp_name); // Solo minusculas
 			$alnum = ereg_replace("[^[:alnum:]]","",$lower); // Solo alfanumericos
-			if ($exten==peg) { unset($exten); $exten = 'jpg'; }
-			$clear = genRandomString($max_name);
-			//$clear = substr_replace($alnum, '', -3); // sin extension ni punto
+			if ($image['info']['exten']==peg) { unset($exten); $exten = 'jpg'; }
+			if ($config['randomName']){ //do we want to gen a random name for each image?
+				$clear = genRandomString($config['max_name_len']);
+			} else {
+				$clear = substr_replace($alnum, '', -3); // sin extension ni punto
+			}
+			
 			// Cortemos el nombre (si hace falta)
 			$conteo = strlen($clear);
 			
@@ -542,8 +532,8 @@ if ($modo==3) {
 			$ch_1 = chr(rand(ord("a"), ord("z")));
 			$ch_2 = chr(rand(ord("z"), ord("a")));
 			
-			if ($conteo>$max_name) {
-				$renombre = substr("$clear", 0, $max_name);
+			if ($conteo>$config['max_name_len']) {
+				$renombre = substr("$clear", 0, $config['max_name_len']);
 			} else {
 				if (empty($clear)) {
 					$renombre = $ch_1.$ch_2.$ch_1;
@@ -553,10 +543,10 @@ if ($modo==3) {
 			}
 				
 			// Si existe el nombre, renombramos el que estamos subiendo.
-        	if (file_exists(DIR_IM.$renombre.'.'.$exten)) {
+        	if (file_exists($config['dir']['im'].$renombre.'.'.$exten)) {
 				if ($conteo>$totalchars) { 
 					// Si el nombre es muy largo, corta
-					$renombra = substr("$renombre", 0, $max_name-4); // 4 -> El remplazo de mas abajo			
+					$renombra = substr("$renombre", 0, $config['max_name_len']-4); // 4 -> El remplazo de mas abajo			
 				} else { 
 					$renombra = $renombre;	
 				}
@@ -602,15 +592,18 @@ if ($modo==3) {
 			// Archivo -> Archivo work ($config['dir']['working'].$name)
 			function redimensionar($tipo,$target,$archivo,$ancho_n,$alto_n) {
 				
-				/* TODO agregar un handle pa esta wea cuando se cae */
-				if ($tipo==gif) {
+				/* TODO agregar un handle pa esta wea cuando se cae */				
+				if ($tipo== "gif") {
 					$src = imagecreatefromgif($target);
 				}
-				if ($tipo==png) {
+				if ($tipo== "png") {
 					$src = imagecreatefrompng($target);
 				}
-				if ($tipo==jpg) {
+				if ($tipo== "jpg") {
 					$src = imagecreatefromjpeg($target);
+				}
+				if ($tipo == "bmp") {
+					$src = imagecreatefromwbmp($target);
 				}
 						
 				$era_x = imageSX($src);
@@ -641,11 +634,11 @@ if ($modo==3) {
 				imagedestroy($destino); 
 				imagedestroy($src);	
 				
-			} // La funcion
+			} // La funcion | end of func
 			
 			if (empty($resize)) {
-				// Haga como si nada...
-				copy($handlework, DIR_IM.$name);
+				// Haga como si nada... | Pretend nothing ...
+				copy($handlework, $config['dir']['im'].$name);
 				$titulo = UPLOAD_OK.ESP_TITULO;
 			}
 			if ($red==1) {
@@ -653,7 +646,7 @@ if ($modo==3) {
 				redimensionar($exten,$handlework,$config['dir']['working'].$name,$ancho,$alto);
 						
 				// Mover la redimensionada
-				copy($config['dir']['working'].$name, DIR_IM.$name);
+				copy($config['dir']['working'].$name, $config['dir']['im'].$name);
 				$titulo = UPLOAD_AND_RESIZED.ESP_TITULO;
 								
 				// Borramos
@@ -717,7 +710,7 @@ if ($modo==2 || $modo==3) {
 	if ($modo==2) {
 		if ($_GET['v']) {
 			$id = $_GET['v'];
-			$imagen = DIR_IM.$id;
+			$imagen = $config['dir']['im'].$id;
 			if (file_exists($imagen)==true) {
 				$title = SEEING.' '.$id; 
 				$titulo = $id.' '.AT.' ';
@@ -736,7 +729,7 @@ if ($modo==2 || $modo==3) {
 	}
 	
 	// LAS URL
-	$URLimg = URL_SCRIPT.DIR_IM.$name;
+	$URLimg = URL_SCRIPT.$config['dir']['im'].$name;
 	$URLthm = URL_SCRIPT.DIR_TH.$name;
 	$URLvim = URL_SCRIPT.'?v='.$name;
 	$URLshr = $URLvim; // Para no cambiar mas abajo
@@ -819,6 +812,5 @@ global $errors;
 	}
 	
 }
-
 
 ?>

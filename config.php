@@ -3,7 +3,7 @@
 /* -----------------------------------------
 
   Chevereto - Images hosting script - Script de hosting de imagenes
-  Nightly Build 2.0 (11/04/2010)
+  Nightly Build 2.1 (30/12/2010)
   http://www.chevereto.com/
 
   Released under the GPL 2.0
@@ -39,7 +39,8 @@ $config['max_filesize'] = '2'; // Max. image size (Mbytes)
 
 // TODO: move to engin.
 $max_by = $config['max_filesize']*1048576; // (bytes)
-$config['max_name_len'] = '10'; // Max. file name lenght.
+$config['max_name_len'] = '13'; // Max. file name lenght.
+$config['randomName'] = false; //genarated random image names?
 
 // Thumbs
 $config['thumb_width'] = '150'; // Thumb width in pixels
@@ -94,7 +95,6 @@ if (strlen($path)>1) {
 } else {
 	define('PATH_SCRIPT', $path);
 }
-echo PATH_SCRIPT;
 
 // URL
 /* Uhhh... Uhhh.. Can't touch this!. */

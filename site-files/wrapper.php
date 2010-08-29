@@ -39,7 +39,7 @@ global $spit, $config;
 <![endif]-->
 
 <script type="text/javascript" src="http://www.google.com/jsapi"></script>
-<script type="text/javascript">google.load("jquery", "1.4");</script>
+<script type="text/javascript">google.load("jquery", "1.4.2");</script>
 <script type="text/javascript" src="<?php echo PATH_SCRIPT;?>js/jquery.scrollTo-min.js"></script>
 <script type="text/javascript" src="<?php echo PATH_SCRIPT;?>js/jquery_support.js"></script>
 
@@ -60,6 +60,11 @@ $(document).ready(function(){
 // ]]>
 </script>
 
+<?php
+	if (isset($extra['header']))
+		echo $extra['header'];	
+?>
+
 </head>
 
 <body>
@@ -68,18 +73,18 @@ $(document).ready(function(){
 //it looks nice here
 //these are the admin/setup errors.
 if ($errors[0]){
-	echo "<div id=\"errorWrapper\">";
+	echo "<div id=\"errorWrapper\">\n";
 	echo proccessErrors();
-	echo "</div>";
+	echo "</div>\n";
 	die();
 	}
 ?>
 
 <div id="top">
 	<div id="logo">
-	  <a href="<?php echo URL_SCRIPT;?>"><img src="<?php echo PATH_SCRIPT;?>site-img/logo.png" alt="<?php echo APP_NAME;?>" /></a>
+	  <a href="<?php echo URL_SCRIPT;?>"><img src="<?php echo PATH_SCRIPT;?>site-img/logo.png" alt="<?php echo $config['name'];?>" /></a>
     </div>
-    <div id="tagline"><?php echo $config['slang'];?></div><div id="limite">JPG PNG BMP GIF <span>Max.<?php echo $max_mb;?>Mb</span></div>
+    <div id="tagline"><?php echo $config['slang'];?></div><div id="limite">JPG PNG BMP GIF <span>Max.<?php echo $config['max_filesize'];?>Mb</span></div>
 </div>
 
 <? if ($spit==true) { ?>
