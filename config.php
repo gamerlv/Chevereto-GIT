@@ -37,24 +37,23 @@ $config['dir']['plugins'] = 'plugins/';
 // Min-Max values -> php.ini read the manuel
 $config['max_filesize'] = '2'; // Max. image size (Mbytes)
 
-// TODO: move to engin.
-$max_by = $config['max_filesize']*1048576; // (bytes)
+//File name conventions
 $config['max_name_len'] = '13'; // Max. file name lenght.
 $config['randomName'] = false; //genarated random image names?
 
 // Thumbs
-$config['thumb_width'] = '150'; // Thumb width in pixels
+$config['thumb_width'] = '150';  // Thumb width in pixels
 $config['thumb_height'] = '150'; // Thumb height in pixels
 
 // Resize
-$config['min_re_size'] =  '16'; // Min. resize value (pixels)
-$config['max_re_size'] = '1280'; // Max. resize value (pixels)
+$config['min_res_size'] =  '16';  // Min. resize value (pixels)
+$config['max_res_size'] = '1280'; // Max. resize value (pixels)
+$config['allow_over_resize'] = false; // true: Allows over resize (aka: make it bigger then there orginal resolution) images - false: Don't allow over resize.
 
 // Options
 $config['same_domain'] = false; // true: Allows uploading just for your domain - false: Allows upload from anywhere (post from another website)
 $config['cut_url_enabled'] = true; //if false no url at all will be cut (shortened)
 $config['cut_url_allow'] = true; // If $cut_url = true -> true: Allows your users to cut their urls (preference) - false: Users can't choose to cut or not. It will always be cut
-$config['allow_over_resize'] = false; // true: Allows over resize images - false: Don't allow over resize.
 $config['prefix'] = "chev_"; //prefx useded in any session or cookie actions (maybe later also db)
 
 //short url making

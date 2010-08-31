@@ -19,9 +19,19 @@ define('BASEPATH', getcwd() );
 require_once(BASEPATH . '/lib/chevereto.class.php');
 $chevereto = new chevereto();
 $chevereto->init();
-/*
-require('lib/chevereto.func.php');
-check_everything();*/
+
+//is resize set?
+if (isset($_POST['resize']) && $_POST['resize'] > $config['min_re_size']): $resize = $_POST['resize']; else: $resize = false; endif;
+//is something posted? aka some one wants to upload
+if ( isset($_POST['tab']) && $_POST['tab'] == "local" ){
+	$chevereto->toWorking($_FILES['localUP']['tmp_name'], $_FILES['localUP']['name']);
+	$imagedata = $chevereto->process($_FILES['localUP'], $_POST['tab'] ,$resize);
+	$chevereto->redirect('self', '?v=' . $imagedata['uploadedFiles']); //redirect to viewer
+}elseif ( isset($_POST['tab']) && $_POST['tab'] == "remote" ) {
+	//remote. First get the files in $config['dir']['working'] and then proccess them.
+	$filenames = $chevereto->getRemote($_POST['remota']);//post remota can be an array.
+	$chevereto ->process($filenames, $_POST['tab'] ,$resize);
+}
 
 //ES
 // DETERMINAMOS QUE MOSTRAMOS Y HACEMOS
@@ -33,7 +43,7 @@ check_everything();*/
 	//  spit = devuelve los mensajes de error.
 	
 //EN 	
-// Show and DETERMINE WHAT WE DO --> $modo
+// Show and DETERMINE WHAT WE DO --> $modo && $chevereto->mode
 	// 1 = Show form.
 	// 2 = display resize fom
 	// 3 = Upload a file

@@ -5,14 +5,14 @@ trigger('beforeRender');
 /* -----------------------------------------
 
   Chevereto - Script de hosting de imagenes
-  Nightly Build 2.0 (11/04/2010)
+  Nightly Build 2.1 (11/04/2010)
   http://www.chevereto.com/
 
   Released under the GPL 2.0
   Copyright (C) 2008 by Rodolfo Berrios
   <inbox at rodolfoberrios dot com>
   
-  2.0 build by Gamerlv
+  2.* builds by Gamerlv
   
 
   ----------------------------------------- */
@@ -25,7 +25,7 @@ trigger('beforeRender');
 
 <meta name="generator" content="Chevereto <?php echo $chevereto->version(); ?>" /><!-- LET IT BIT! -->
 
-<title><? echo $titulo.' ' . $config['name'];?> - <?php echo $config['slang'];?></title>
+<title><? echo $titulo.' | ' . $config['name'];?> - <?php echo $config['slang'];?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="content-language" content="<?php echo LANG;?>" />
 <link href="<?php echo URL_SCRIPT;?>style.css" rel="stylesheet" type="text/css" />
@@ -108,7 +108,7 @@ if ($errors[0]){
 
 <div id="foot">
 		<div class="foot-d2">
-		<!-- NOTE: maybe base64 encode? and move to lib? (to prevent pp removing) -->
+		<!-- YOU MAY NOT REMOVE THIS LINK BACK ULNESS YOU HAVE WRITTEN APPROVAL OF THE ORIGINAL CREATOR-->
 			<?php echo $config['name'];?>, Powered by <a href="http://chevereto.com/" target="_blank">Chevereto Version: <?php echo $chevereto->version();?></a>
 		</div>
 		<?php

@@ -40,7 +40,7 @@ class ErrorSystem
 		return true;
 	}	
 	
-	public function addError($severity, $text, $title=ERROR_UPLOADING)
+	public function addError($severity, $text, $title)
 	{
 		$this->errors[$severity][] = $text;
 		$this->gotErrors = true;

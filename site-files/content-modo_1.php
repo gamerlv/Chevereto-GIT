@@ -19,7 +19,7 @@
     <div id="contenedorupload">
         <div id="subir_local">
             <h2 id="chooselocal"><?php echo TXT_LOCAL;?></h2>
-            <div class="inputs"><input name="fileup" type="file" size="60" id="localUP" onclick="javascript:document.getElementById('remotaUP').value = '';"/></div>
+            <div class="inputs"><input name="localUP" type="file" size="60" id="localUP" onclick="javascript:document.getElementById('remotaUP').value = '';"/></div>
         </div>
         <div id="subir_remota" style="display: none;">
             <h2 id="chooseremota"><?php echo TXT_REMOTE;?></h2>
