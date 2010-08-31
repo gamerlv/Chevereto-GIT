@@ -1,26 +1,26 @@
 <?php
-#doc
-#	classname:	ErrorSystem
-#	scope:		PUBLIC
-#	Maker:		Gamerlv
-#
-#/doc
+/* doc
+*	classname:	ErrorSystem
+*	scope:		PUBLIC
+*	Maker:		Gamerlv
+*
+/doc */
 
 class ErrorSystem
 {
-	#	internal variables
+	//	internal variables
 	var $gotErrors = false;
 	var $errors = array();
 	var $spitError = "";
 	var $title = "";
 	
-	#	Constructor
+	//	Constructor
 	function __construct ()
 	{
-		# code...
+		// code...
 		
 	}
-	###
+	// ###
 	
 	public function gotErrors()
 	{
@@ -92,10 +92,10 @@ class ErrorSystem
 		{
 			if ($key == 0) continue; //This is for something else, is true if there is an error
 			
-			$this->addError('critical', $error);
+			$this->addError('critical', $error, ERROR_UPLOADING);
 		}
 		return true;
 	}
 
 }
-###
+// ###

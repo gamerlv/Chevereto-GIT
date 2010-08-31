@@ -179,5 +179,5 @@ function saveSettings($pluginName, $data, $overwrite = false)
 	
 }
 
-#TODO: add functions for extra header/footer.
+//TODO: add functions for extra header/footer.
 ?>

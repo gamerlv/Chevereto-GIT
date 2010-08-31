@@ -1,11 +1,11 @@
 <?php
-#doc
-#	classname:	chevereto
-#	scope:		PUBLIC
-#	builder:	Gamerlv And rodolfo berrios
-#	Version:	2.1 NB Revision 11
-#
-#/doc
+/* doc
+*	classname:	chevereto
+*	scope:		PUBLIC
+*	builder:	Gamerlv And rodolfo berrios
+*	Version:	2.1 NB Revision 11
+*
+/doc */
 if (!defined('BASEPATH'))
 	define('BASEPATH', getcwd() . "..");
 
@@ -16,19 +16,19 @@ include_once(BASEPATH . '/lib/plugins.php'); //load up the plugins.
 
 class chevereto
 {
-	#	internal variables
+	//	internal variables
 	private $version = "NB 2.1 Revision 13";
 	var $title = "";
 	var $mode = 1;
 	var $lang = "en";
 	var $image = array(); //the image object. will contain all image dat. e.g: filename, tmp name, size.
 	
-	#	Constructor
+	//	Constructor
 	function __construct ()
 	{
 		
 	}
-	###
+	//
 	public function init()
 	{
 		global $config,$firephp,$e,$errors,$max_by;
@@ -57,10 +57,10 @@ class chevereto
 		
 	}
 	
-	##doc
-	# Purpos: Check directories premissions
-	# Creator: Rodolfo Berrios
-	##/doc
+	/* doc
+	* Purpos: Check directories premissions
+	* Creator: Rodolfo Berrios
+	/doc */
 	function check_dir_permissions($dir) {
 		global $errors;
 		if(!is_writable($dir)) {
@@ -70,10 +70,10 @@ class chevereto
 		}
 	}
 
-	##doc
-	# Purpos: check if everything is ok
-	# Creator: Gamerlv
-	##/doc
+	/* doc
+	* Purpos: check if everything is ok
+	* Creator: Gamerlv
+	*/
 	function check_everything(){
 		global $config, $errors, $DOM_SCRIPT;
 
@@ -126,11 +126,11 @@ class chevereto
 		return true;		
 	}
 	
-	##doc
-	# Purpos:  proccess the image input. and drives all the other functions
-	# Creator: Gamerlv
-	# Returns: array('mode'=>'single/multi', 'filenames'=> a imploded string if multie or a single filename )
-	##/doc
+	/* doc
+	* Purpos:  proccess the image input. and drives all the other functions
+	* Creator: Gamerlv
+	* Returns: array('mode'=>'single/multi', 'filenames'=> a imploded string if multie or a single filename )
+	*/
 	public function process($files, $newSize=false, $origin ,$mode=1)
 	{
 			$this->mode = 3; //we are uploading
@@ -289,8 +289,8 @@ class chevereto
 	return true;		
 	} // La funcion | end of func
 	
-	#TODO: check if this works/ optimize?
-	#CHANGED: (11/07/10) preped this for the language selecter
+	//TODO: check if this works/ optimize?
+	//CHANGED: (11/07/10) preped this for the language selecter
 	function loadLanguage($flang=null)
 	{
 		global $config;
@@ -356,7 +356,7 @@ class chevereto
 		if ($config['randomName']) $filename = $this->genarateRandomName($length); //make a name random
 		$filename = substr($filename, 0 , $length);
 		$a = 0;
-		while (file_exists($config['dir']['im'] . $filename)
+		while (file_exists($config['dir']['im'] . $filename))
 		{
 			$filename .= $a;
 			$a++;
@@ -382,7 +382,7 @@ class chevereto
 	
 	public function getVarInfo($variable)
 	{
-		#NOTE: this is not smart. :(
+		//NOTE: this is not smart. :(
 		return $this->$variable;
 	}
 	
@@ -398,6 +398,6 @@ class chevereto
 	}
 
 }
-###
+// end class
 
 ?>
